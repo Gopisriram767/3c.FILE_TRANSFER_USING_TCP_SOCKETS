@@ -1,20 +1,21 @@
 import socket
-
-def receive_file(output_filename, host='127.0.0.1', port=65432):
-    # Create TCP socket
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((host, port))
-
-    # Receive file data and write to output file
-    with open(output_filename, 'wb') as f:
-        while True:
-            data = client_socket.recv(1024)
-            if not data:
-                break
-            f.write(data)
-
-    print("File received successfully.")
-    client_socket.close()
-
-if __name__ == "__main__":
-    receive_file("received_sample.txt")   # File will be saved here
+HOST="0.0.0.0"   
+PORT=5001
+BUFFER_SIZE=4096
+server=socket.socket()
+server.bind((HOST, PORT))
+server.listen(1)
+print("Server listening on port", PORT)
+conn, addr=server.accept()
+print("Connected from", addr)
+filename=conn.recv(BUFFER_SIZE).decode()
+print("Receiving file:", filename)
+with open("received_" + filename, "wb") as file:
+    while True:
+        data=conn.recv(BUFFER_SIZE)
+        if not data:
+            break
+        file.write(data)
+print("File received successfully.")
+conn.close()
+server.close()
